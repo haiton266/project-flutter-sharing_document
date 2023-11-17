@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'pdf_viewer.dart';
+import 'AddPdfViewer.dart';
+import 'Profile.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,9 +15,8 @@ void main() async {
 class MyApp extends StatelessWidget {
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString('email');
-    final password = prefs.getString('password');
-    return email != null && password != null;
+    final token = prefs.getString('token');
+    return token != null;
   }
 
   @override
@@ -54,15 +55,15 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _postData() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    final String apiUrl = 'https://haiton26061.pythonanywhere.com/user/login';
+    final String apiUrl = 'https://haiton26062.pythonanywhere.com/user/login';
 
     final response = await http.post(
       Uri.parse(apiUrl),
@@ -70,15 +71,20 @@ class _MyHomePageState extends State<MyHomePage> {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        'email': _nameController.text,
-        'password': _emailController.text,
+        'email': _emailController.text,
+        'password': _passwordController.text,
       }),
     );
 
     if (response.statusCode == 200) {
       final prefs = await SharedPreferences.getInstance();
-      prefs.setString('email', _nameController.text);
-      prefs.setString('password', _emailController.text);
+      final responseData = jsonDecode(response.body);
+      prefs.setString('phone', responseData['phone'].toString());
+      prefs.setString('address', responseData['address'].toString());
+      prefs.setString('email', responseData['email'].toString());
+      prefs.setString('username', responseData['username'].toString());
+      prefs.setString('id', responseData['id'].toString());
+      prefs.setString('token', responseData['access_token'].toString());
 
       Navigator.pushNamed(context, '/second');
     } else {
@@ -99,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             children: [
               TextFormField(
-                controller: _nameController,
+                controller: _emailController,
                 decoration: InputDecoration(labelText: 'Email'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -109,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
               TextFormField(
-                controller: _emailController,
+                controller: _passwordController,
                 decoration: InputDecoration(labelText: 'Password'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -159,6 +165,24 @@ class SecondScreen extends StatelessWidget {
               },
               child: Text('PDF'),
             ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddPdfViewer()), // Điều hướng đến màn hình PDF
+                );
+              },
+              child: Text('Add pdf'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Profile()), // Điều hướng đến màn hình PDF
+                );
+              },
+              child: Text('Profile'),
+            ),
           ],
         ),
       ),
@@ -169,7 +193,12 @@ class SecondScreen extends StatelessWidget {
   void _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove('email');
-    prefs.remove('password');
+    prefs.remove('username');
+    prefs.remove('address');
+    prefs.remove('phone');
+    prefs.remove('id');
+    prefs.remove('token');
+
 
     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }

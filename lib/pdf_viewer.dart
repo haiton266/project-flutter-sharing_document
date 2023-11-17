@@ -27,7 +27,7 @@ class _MyPdfViewerState extends State<MyPdfViewer> {
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
         if (data.isNotEmpty) {
-          var firstObject = data[0];
+          var firstObject = data[1];
           setState(() {
             imageUrl = firstObject['image_url'];
             print(imageUrl);
