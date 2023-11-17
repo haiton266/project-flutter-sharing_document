@@ -15,13 +15,12 @@ class _AddPdfViewerState extends State<AddPdfViewer> {
 
   Future<void> _uploadPdf(File? file) async {
     if (file != null) {
-      final url = Uri.parse('https://haiton26061.pythonanywhere.com/image/add');
+      final url = Uri.parse('https://haiton26062.pythonanywhere.com/image/add');
       final request = http.MultipartRequest('POST', url);
       request.files.add(await http.MultipartFile.fromPath('image', file.path));
-      request.files.add(await http.MultipartFile.fromPath('img_hover', file.path));
-      request.fields['price_value'] = '100';
-      request.fields['image_name'] = _pdfName;
-      request.fields['type_name'] = _selectedSubject;
+      request.fields['school'] = 'BKDN';
+      request.fields['name'] = _pdfName;
+      request.fields['type'] = _selectedSubject;
 
       try {
         final streamedResponse = await request.send();

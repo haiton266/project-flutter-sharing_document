@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'pdf_viewer.dart';
-import 'AddPdfViewer.dart';
-import 'Profile.dart';
+import 'HomePage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   runApp(MyApp());
 }
 
@@ -36,24 +33,24 @@ class MyApp extends StatelessWidget {
               );
             }
             if (snapshot.hasData && snapshot.data == true) {
-              return SecondScreen();
+              return HomePage();
             } else {
-              return MyHomePage();
+              return LoginPage();
             }
           },
         ),
-        '/second': (context) => SecondScreen(),
+        '/second': (context) => HomePage(),
       },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class LoginPage extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -136,70 +133,5 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
-  }
-}
-
-class SecondScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Second Screen'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                _logout(context);
-              },
-              child: Text('Logout'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MyPdfViewer()), // Điều hướng đến màn hình PDF
-                );
-              },
-              child: Text('PDF'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddPdfViewer()), // Điều hướng đến màn hình PDF
-                );
-              },
-              child: Text('Add pdf'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Profile()), // Điều hướng đến màn hình PDF
-                );
-              },
-              child: Text('Profile'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-
-  void _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.remove('email');
-    prefs.remove('username');
-    prefs.remove('address');
-    prefs.remove('phone');
-    prefs.remove('id');
-    prefs.remove('token');
-
-
-    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 }
