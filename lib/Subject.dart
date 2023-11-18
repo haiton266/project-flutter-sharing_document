@@ -51,9 +51,20 @@ class _SubjectState extends State<Subject> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Danh sách ${widget.nameSubject}'),
+        title: Text(
+          '${widget.nameSubject}',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 25, // Đặt kích thước chữ là 20
+            fontWeight: FontWeight.bold, // Có thể thêm kiểu chữ in đậm nếu muốn
+          ),
+        ),
+        backgroundColor: Colors.white,
+        centerTitle: true, // Đặt tiêu đề căn giữa
+        elevation: 0, // Đặt độ nâng của AppBar là 0 để xóa gạch ngang phân cách
+        iconTheme: IconThemeData(color: Colors.black), // Đặt màu của icon là đen
       ),
-      body: isLoading
+        body: isLoading
           ? Center(
         child: CircularProgressIndicator(),
       )
@@ -65,14 +76,7 @@ class _SubjectState extends State<Subject> {
             child: Image.asset(
               widget.urlImageSubject, // Replace with your image path
               // width: 500, // Adjust width as needed
-              height: 140, // Adjust height as needed
-            ),
-          ),
-          Text(
-            widget.nameSubject,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
+              height: 180, // Adjust height as needed
             ),
           ),
           Expanded(

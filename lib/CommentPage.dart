@@ -4,26 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'pdf_viewer.dart';
 
-// class CommentPage extends StatelessWidget {
-//   final int id;
-//
-//   CommentPage(this.id);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     // Sử dụng ID ở đây cho mục đích của bạn
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Detail Page'),
-//       ),
-//       body: Center(
-//         child: Text('ID: $id'), // Hiển thị ID hoặc thông tin khác
-//       ),
-//     );
-//   }
-// }
-
-
 class CommentPage extends StatefulWidget {
   final int id;
 
@@ -35,9 +15,14 @@ class CommentPage extends StatefulWidget {
 class _CommentsPageState extends State<CommentPage> {
   List<dynamic> comments = [];
   TextEditingController contentController = TextEditingController();
-  TextEditingController usernameController = TextEditingController();
+
   String name_file = "";
+  String name_type = "";
+  String name_school = "";
   String url_pdf = "";
+  bool dataLoaded1 = false; // Biến cờ để kiểm tra dữ liệu đã được tải
+  bool dataLoaded2 = false; // Biến cờ để kiểm tra dữ liệu đã được tải
+
   @override
   void initState() {
     super.initState();
@@ -47,13 +32,19 @@ class _CommentsPageState extends State<CommentPage> {
 
   Future<void> _fetchInfoPdf() async {
     try {
-      var response = await http.get(
-          Uri.parse('https://haiton26062.pythonanywhere.com/image/${widget.id}'));
+      var response = await http.get(Uri.parse(
+          'https://haiton26062.pythonanywhere.com/image/${widget.id}'));
+
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
-        name_file = data['name'];
-        url_pdf = data['pdf_url'];
-        print(url_pdf);
+        setState(() {
+          name_file = data['name'];
+          name_type = data['type'];
+          name_school = data['school'];
+          url_pdf = data['pdf_url'];
+          print(url_pdf);
+          dataLoaded1 = true; // Đặt cờ thành true sau khi dữ liệu đã được tải
+        });
       }
     } catch (e) {
       print('Error fetching PDF: $e');
@@ -61,11 +52,13 @@ class _CommentsPageState extends State<CommentPage> {
   }
 
   Future<void> fetchData() async {
-    final response = await http.get(Uri.parse('https://haiton26062.pythonanywhere.com/feedback_data/${widget.id}'));
+    final response = await http.get(Uri.parse(
+        'https://haiton26062.pythonanywhere.com/feedback_data/${widget.id}'));
 
     if (response.statusCode == 200) {
       setState(() {
         comments = json.decode(response.body);
+        dataLoaded2 = true;
       });
     } else {
       throw Exception('Failed to load comments');
@@ -75,9 +68,9 @@ class _CommentsPageState extends State<CommentPage> {
   Future<void> postComment() async {
     final prefs = await SharedPreferences.getInstance();
     final username = prefs.getString('username');
+
     final response = await http.post(
       Uri.parse('https://haiton26062.pythonanywhere.com/feedback_data/add'),
-
       body: json.encode({
         'content': contentController.text,
         'username': username,
@@ -87,10 +80,8 @@ class _CommentsPageState extends State<CommentPage> {
     );
 
     if (response.statusCode == 200) {
-      // Clear text fields after successful submission
+      // Clear text field after successful submission
       contentController.clear();
-      usernameController.clear();
-
       // Fetch updated data after adding the comment
       fetchData();
     } else {
@@ -100,28 +91,117 @@ class _CommentsPageState extends State<CommentPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!dataLoaded1 || !dataLoaded2) {
+      // Nếu dữ liệu chưa được tải, bạn có thể hiển thị một tiêu đề hoặc tiến trình tải
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    // Nếu dữ liệu đã được tải, hiển thị giao diện bình thường
     return Scaffold(
       appBar: AppBar(
-        title: Text('Comments'),
+        title: Text(
+          '$name_type',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: Column(
         children: [
-          Text('Abc${name_file}'),
-          ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MyPdfViewer(url_pdf)), // Điều hướng đến màn hình PDF
-            );
-          },
-          child: Text('PDF'),
-        ),
+          Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                Image.asset('assets/pdf.png', height: 120),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ' $name_file',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '  $name_type',
+                          style: TextStyle(
+                            color: Colors.blue[900],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '  $name_school',
+                          style: TextStyle(
+                            color: Colors.blue[900],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MyPdfViewer(url_pdf),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                              side:
+                              BorderSide(color: Colors.purple, width: 2.0),
+                            ),
+                            primary: Colors.white,
+                            padding: EdgeInsets.symmetric(horizontal: 32.0),
+                            minimumSize: Size(35.0, 25.0),
+                          ),
+                          child: Text(
+                            'Xem ngay',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Comments',
+              style: TextStyle(fontSize: 24),
+            ),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: comments.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
-                  title: Text(comments[index]['username']),
+                  title: Text(
+                    comments[index]['username'],
+                    style: TextStyle(fontSize: 24),
+                  ),
                   subtitle: Text(comments[index]['content']),
                 );
               },
@@ -129,21 +209,21 @@ class _CommentsPageState extends State<CommentPage> {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                TextField(
-                  controller: contentController,
-                  decoration: InputDecoration(labelText: 'Enter content'),
-                ),
-                ElevatedButton(
+            child: TextField(
+              controller: contentController,
+              decoration: InputDecoration(
+                labelText: 'Nhập bình luận',
+                suffixIcon: IconButton(
                   onPressed: () {
                     postComment();
                   },
-                  child: Text('Send'),
+                  icon: Icon(Icons.send), // Biểu tượng thay thế 'Send'
                 ),
-              ],
+              ),
             ),
           ),
+
+
         ],
       ),
     );
