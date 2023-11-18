@@ -7,12 +7,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatelessWidget {
   final Sbj = [
-    {'code': 'giaitich', 'text': 'Giải tích', 'image': 'assets/giaitich_image.png'},
-    {'code': 'laptrinh', 'text': 'Lập trình', 'image': 'assets/laptrinh_image.png'},
-    {'code': 'dientu', 'text': 'Điện tử', 'image': 'assets/dientu_image.png'},
-    {'code': 'vatly', 'text': 'Vật lý', 'image': 'assets/vatly_image.png'},
-    {'code': 'vienthong', 'text': 'Viễn thông', 'image': 'assets/vienthong_image.png'},
-    {'code': 'nhung', 'text': 'Nhúng', 'image': 'assets/nhung_image.png'}
+    {'code': 'giaitich', 'text': 'Giải tích', 'image': 'assets/giaitich.png'},
+    {'code': 'laptrinh', 'text': 'Lập trình', 'image': 'assets/laptrinh.png'},
+    {'code': 'dientu', 'text': 'Điện tử', 'image': 'assets/dientu.png'},
+    {'code': 'vatly', 'text': 'Vật lý', 'image': 'assets/vatly.png'},
+    {'code': 'vienthong', 'text': 'Viễn thông', 'image': 'assets/vienthong.png'},
+    {'code': 'nhung', 'text': 'Nhúng', 'image': 'assets/nhung.png'}
   ];
 
   @override
@@ -28,7 +28,7 @@ class HomePage extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Subject(Sbj[index]['code']!)), // Điều hướng đến màn hình PDF
+                MaterialPageRoute(builder: (context) => Subject(Sbj[index]['code']!,Sbj[index]['text']!,Sbj[index]['image']!)), // Điều hướng đến màn hình PDF
               );
             },
             child: Container(
